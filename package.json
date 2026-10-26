@@ -1,0 +1,85 @@
+{
+  "name": "dsh-power-menu-mac",
+  "version": "0.1.0",
+  "description": "给 DSH 桌面版（macOS）加一个右上角电源按钮。点开只有「关闭DSH」和「重启DSH」：关闭结束整个应用，重启会把窗口拉回来，并确认新进程真的注册到了窗口服务器。纯本地，只监听回环地址。",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": {
+      "default": "./lib/index.js"
+    },
+    "./client": {
+      "default": "./lib/client.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "install.sh",
+    "enable.sh",
+    "cordis.patch.yml",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE",
+    "docs"
+  ],
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "power",
+    "power-menu",
+    "restart",
+    "shutdown",
+    "macos",
+    "darwin",
+    "desktop"
+  ],
+  "author": "DDDMUC",
+  "contributors": [
+    "xichen-62 (original dsh-power-menu, MIT)"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DDDMUC/dsh-power-menu-mac.git"
+  },
+  "homepage": "https://github.com/DDDMUC/dsh-power-menu-mac#readme",
+  "bugs": {
+    "url": "https://github.com/DDDMUC/dsh-power-menu-mac/issues"
+  },
+  "os": [
+    "darwin"
+  ],
+  "engines": {
+    "node": ">=22",
+    "dsh": ">=0.2.0-rc.1"
+  },
+  "scripts": {
+    "check": "node --check lib/index.js && node --check lib/client.js && node --check lib/helper.cjs && node -e \"const fs=require('node:fs'); JSON.parse(fs.readFileSync('package.json','utf8')); console.log('package.json ok')\"",
+    "test": "npm run check"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-slots"
+      ],
+      "platform": "web"
+    }
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "*",
+    "@deepseek-ai/dsh-client-ui-slots": "*"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/cordis": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-client-ui-slots": {
+      "optional": true
+    }
+  }
+}
