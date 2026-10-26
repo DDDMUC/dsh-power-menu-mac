@@ -1,0 +1,8 @@
+# dsh-power-menu-mac：bundle patch 层。
+# 安装到 profile 后，这一行把插件挂进组合配置。
+#
+# 和原版 `dsh-power-menu` 用的是不同的 id，两个包可以同时装在同一个 profile 里
+# 而不会互相覆盖 —— 但它们都会往会话头部挂一个电源按钮，所以实际上只应该启用一个。
+- insert:
+    - id: dsh-power-menu-mac
+      name: dsh-power-menu-mac
