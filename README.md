@@ -121,15 +121,25 @@ ln -s "$PWD/dsh-power-menu-mac" ~/.dsh/profiles/desktop/node_modules/dsh-power-m
 
 ## 配置
 
-定时面板里那个输入框的**默认分钟数**在 `~/.dsh/dsh-power-menu-mac/config.json`，第一次读取时会自动生成：
+`~/.dsh/dsh-power-menu-mac/config.json`，第一次读取时会自动生成：
 
 ```json
 {
-  "delayedRestartMinutes": 10
+  "delayedRestartMinutes": 10,
+  "restartGuidance": true,
+  "restartGuidanceText": ""
 }
 ```
 
-允许 1–1440 的整数（1 分钟到 24 小时）。写成别的值（小数、0、负数、超过 1440、字符串）一律回落到 10。改完**打开一次菜单**就生效，不用重启应用。面板里每次都可以临时改数字，配置文件只决定默认值。
+| 字段 | 作用 | 合法值 |
+| --- | --- | --- |
+| `delayedRestartMinutes` | 定时面板输入框的**默认**分钟数 | 1–1440 的整数；小数、0、负数、超过 1440、字符串一律回落 10 |
+| `restartGuidance` | 是否注入下面那段系统提示词 | 只有显式 `false` 才关；缺省或写错类型都当开 |
+| `restartGuidanceText` | 自定义注入内容 | 非空字符串替换默认文本；超过 2000 字截断 |
+
+改完**打开一次菜单**就生效（提示词是下一个请求生效），都不用重启应用。面板里每次都能临时改数字，`delayedRestartMinutes` 只决定默认值。
+
+老版本的配置文件只有 `delayedRestartMinutes`，缺的两个字段会走默认行为，不需要迁移。
 
 ## 注入的系统提示词
 
@@ -145,6 +155,7 @@ DSH 桌面应用的重启与关闭由用户自己通过界面右上角的电源�
 - **只在桌面宿主渲染**。`text` 是个函数，非桌面宿主（`dsh web`）返回空串，空段落会被整段丢掉——那里没有电源菜单，说"用户自己点"是错误指引。
 - **范围刻意写窄**。没有写成「不要问用户」，那样会连带压住改文件、跑命令之类的正常询问。
 - **它是全局的**。所有会话、所有 preset 都会看到。哪天你想让模型帮你重启，这句会压住它——用 `dsh plugin` 停用本插件即可恢复。
+- **可以关，也可以换掉**。`config.json` 里 `restartGuidance: false` 就不注入；`restartGuidanceText` 填一段自己的话就替换掉默认文本（上限 2000 字，超了截断并在日志里记一笔）。改完下一个请求就生效。
 
 ## 工作原理
 
