@@ -2,6 +2,17 @@
 
 本项目遵循 [Semantic Versioning](https://semver.org/spec/v2.0.0.html)，格式参考 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)。
 
+## [0.1.3] - 2026-10-30
+
+### Added
+
+- 菜单里新增 **刷新页面**：只重载渲染层，应用、Host、会话和正在跑的轮次都不受影响。之前想刷新只能重启整个应用，而重启一次就会多下发一条 `dsh-auth-<随机>` cookie —— 正是 0.1.2 修的那个 16 KB 请求头上限的成因。现在刷新不必再走重启。
+
+### Changed
+
+- 菜单项改成按破坏性从小到大排列：**刷新页面 → 重启DSH → 关闭DSH**。误触最多落到刷新，不会落到关闭。
+- 菜单项新增契约属性 `data-dsh-power-action="refresh"`，与已有的 `restart` / `shutdown` 一致。
+
 ## [0.1.2] - 2026-10-29
 
 ### Fixed

@@ -1,6 +1,6 @@
 # dsh-power-menu-mac
 
-给 DeepSeek Harness 桌面版（**macOS**）加一个右上角电源按钮：点开只有 **关闭DSH** 和 **重启DSH** 两项，省得每次改完插件/配置还要去菜单栏里翻「退出」。
+给 DeepSeek Harness 桌面版（**macOS**）加一个右上角电源按钮：点开有 **刷新页面**、**重启DSH**、**关闭DSH** 三项，省得每次改完插件/配置还要去菜单栏里翻「退出」——多数时候你要的只是刷新，不必重启。
 
 > macOS 专用 · 只支持 DSH Desktop · 纯本地 · 无外部依赖 · MIT
 >
@@ -18,11 +18,12 @@ DSH Desktop 关窗口只是收进 Dock，真正退出或重启要走菜单栏；
 
 - **右上角电源按钮**：位于会话标题栏图标行最右侧，顺序为「布局 / 侧栏 / 电源」。
 - **空会话也显示**：欢迎页和对话内使用同一个挂载位置，透明无底色，不会破坏主题，也不会出现两个按钮。
-- **两项操作**：白色圆角卡片、悬浮阴影、左侧线性图标 + 右侧文本，不塞多余入口。
-- **关闭DSH**：结束整个 DeepSeek Harness 桌面应用（Electron 主进程 + Host），不重新启动。
+- **三项操作**：白色圆角卡片、悬浮阴影、左侧线性图标 + 右侧文本，不塞多余入口；按破坏性从小到大排，误触最多落到「刷新页面」。
+- **刷新页面**：只重载这一层页面，应用和 Host 都不动。改完插件/配置用它，别再用重启代替刷新。
 - **重启DSH**：结束整个应用，等旧端口释放后用原可执行文件重新拉起，窗口自动回来。
+- **关闭DSH**：结束整个 DeepSeek Harness 桌面应用（Electron 主进程 + Host），不重新启动。
 - **重启会验证真的回来了**：新进程必须**注册到 macOS 窗口服务器**（`lsappinfo`）并活过启动宽限期，才算成功；只是「进程还在」不算。
-- **键盘可用**：`↑` / `↓` / `Home` / `End` 在两项间移动，`Enter` / 空格执行，`Esc` 关闭，点菜单外部也能关。
+- **键盘可用**：`↑` / `↓` / `Home` / `End` 在三项间移动，`Enter` / 空格执行，`Esc` 关闭，点菜单外部也能关。
 - **执行反馈**：点击后整页盖一层半透明遮罩，显示「正在关闭DSH…」/「正在重启DSH…」。
 - **纯本地**：没有外部依赖、没有遥测；接口只监听本机回环地址，并做同源校验。
 - **非 macOS 不加载**：宿主半只说 POSIX，所以在别的系统上按钮**根本不会画出来**，而不是画出来点了没反应。
@@ -100,15 +101,16 @@ ln -s "$PWD/dsh-power-menu-mac" ~/.dsh/profiles/desktop/node_modules/dsh-power-m
 ## 使用
 
 1. 在会话标题栏右上角点电源图标。
-2. 选择 **关闭DSH** 或 **重启DSH**。
-3. 等待遮罩出现：关闭会退出应用；重启会在几秒后把窗口拉回来。
+2. 选择 **刷新页面**、**重启DSH** 或 **关闭DSH**。
+3. 刷新会立刻重载界面；关闭会退出应用；重启会在几秒后把窗口拉回来（后两者才有遮罩）。
 
 | 动作 | 结果 | 需要手动重开？ |
 | --- | --- | --- |
-| 关闭DSH | 结束整个桌面应用，不重新启动 | 是 |
+| 刷新页面 | 只重载渲染层，应用与 Host 继续运行 | 否，界面自己回来 |
 | 重启DSH | 结束应用 → 等端口释放 → 重新拉起 → 验证窗口 | 否，窗口自动回来 |
+| 关闭DSH | 结束整个桌面应用，不重新启动 | 是 |
 
-> **注意**：点击即执行，没有二次确认。两个动作都会中断正在生成的回答、运行中的工具和后台任务。请在点之前保存手头的事情。
+> **注意**：点击即执行，没有二次确认。重启和关闭都会中断正在生成的回答、运行中的工具和后台任务，请在点之前保存手头的事情；**刷新不会中断任务**，它只重载界面，后台照常跑。
 
 ## 工作原理
 
@@ -258,10 +260,11 @@ DSH 的 `conversation.session.header.corner` 是单占用槽，已经被侧栏�
 
 ## English
 
-A macOS port of [dsh-power-menu](https://github.com/xichen-62/dsh-power-menu) (MIT). Adds a power button to the top-right of the DSH Desktop session header with exactly two actions:
+A macOS port of [dsh-power-menu](https://github.com/xichen-62/dsh-power-menu) (MIT). Adds a power button to the top-right of the DSH Desktop session header with three actions, least destructive first:
 
-- **关闭DSH** — quit the whole desktop app (no relaunch).
+- **刷新页面** — reload the renderer only; the app and its Host keep running, so this replaces the usual "restart just to refresh" habit.
 - **重启DSH** — quit and relaunch the app, so the window comes back automatically.
+- **关闭DSH** — quit the whole desktop app (no relaunch).
 
 The Windows build drove `taskkill` and PowerShell; this one drives POSIX `ps` / `kill` / `lsappinfo`. The meaningful difference: a restart is only reported as successful once the new process has **registered with the macOS window server** (`lsappinfo find pid=…`) and survived its startup grace — "the process is still alive" is not accepted as proof, which is all the original could check on macOS.
 
