@@ -1,6 +1,6 @@
 # dsh-power-menu-mac
 
-给 DeepSeek Harness 桌面版（**macOS**）加一个右上角电源按钮：点开有 **刷新页面**、**重启DSH**、**N 分钟后重启**、**关闭DSH** 四项，省得每次改完插件/配置还要去菜单栏里翻「退出」——多数时候你要的只是刷新，不必重启。
+给 DeepSeek Harness 桌面版（**macOS**）加一个右上角电源按钮：点开有 **刷新页面**、**重启DSH**、**定时…**、**关闭DSH** 四项，省得每次改完插件/配置还要去菜单栏里翻「退出」——多数时候你要的只是刷新，不必重启。
 
 > macOS 专用 · 只支持 DSH Desktop · 纯本地 · 无外部依赖 · MIT
 >
@@ -21,7 +21,7 @@ DSH Desktop 关窗口只是收进 Dock，真正退出或重启要走菜单栏；
 - **四项操作**：白色圆角卡片、悬浮阴影、左侧线性图标 + 右侧文本，不塞多余入口；按破坏性从小到大排，误触最多落到「刷新页面」。
 - **刷新页面**：只重载这一层页面，应用和 Host 都不动。改完插件/配置用它，别再用重启代替刷新。
 - **重启DSH**：结束整个应用，等旧端口释放后用原可执行文件重新拉起，窗口自动回来。
-- **N 分钟后重启**：现在关掉，隔 N 分钟再拉起。N 存在 `~/.dsh/dsh-power-menu-mac/config.json`（默认 10），菜单文案跟着配置变，改完打开菜单即生效、不用重启应用。等待期间你自己把 DSH 打开了，它到点不会再多开一个。
+- **定时…**：点开一个小面板，先填分钟数，再从三种里选一种 ——「N 分钟后关闭」（到点才关，期间照常用）、「N 分钟后重启」（到点关掉再开）、「现在关闭，N 分钟后启动」（立刻关，过一会儿自己回来）。面板会显示换算出的执行时刻；有定时在等的时候，面板底部多一行「取消定时」。
 - **关闭DSH**：结束整个 DeepSeek Harness 桌面应用（Electron 主进程 + Host），不重新启动。
 - **重启会验证真的回来了**：新进程必须**注册到 macOS 窗口服务器**（`lsappinfo`）并活过启动宽限期，才算成功；只是「进程还在」不算。
 - **键盘可用**：`↑` / `↓` / `Home` / `End` 在四项间移动，`Enter` / 空格执行，`Esc` 关闭，点菜单外部也能关。
@@ -102,14 +102,16 @@ ln -s "$PWD/dsh-power-menu-mac" ~/.dsh/profiles/desktop/node_modules/dsh-power-m
 ## 使用
 
 1. 在会话标题栏右上角点电源图标。
-2. 选择 **刷新页面**、**重启DSH**、**N 分钟后重启** 或 **关闭DSH**。
+2. 选择 **刷新页面**、**重启DSH**、**定时…** 或 **关闭DSH**。
 3. 刷新会立刻重载界面；关闭会退出应用；重启会在几秒后把窗口拉回来（后两者才有遮罩）。
 
 | 动作 | 结果 | 需要手动重开？ |
 | --- | --- | --- |
 | 刷新页面 | 只重载渲染层，应用与 Host 继续运行 | 否，界面自己回来 |
 | 重启DSH | 结束应用 → 等端口释放 → 重新拉起 → 验证窗口 | 否，窗口自动回来 |
-| N 分钟后重启 | 结束应用 → 清 cookie → 等 N 分钟 → 重新拉起 | 否，到点自己回来 |
+| N 分钟后关闭 | 什么都不做 → 到点优雅关闭 → 清 cookie | 是 |
+| N 分钟后重启 | 什么都不做 → 到点关闭 → 清 cookie → 重新拉起 | 否，到点自己回来 |
+| 现在关闭，N 分钟后启动 | 立刻关闭 → 清 cookie → 等 N 分钟 → 重新拉起 | 否，到点自己回来 |
 | 关闭DSH | 结束整个桌面应用，不重新启动 | 是 |
 
 > **注意**：点击即执行，没有二次确认。重启和关闭都会中断正在生成的回答、运行中的工具和后台任务，请在点之前保存手头的事情；**刷新不会中断任务**，它只重载界面，后台照常跑。
@@ -118,7 +120,7 @@ ln -s "$PWD/dsh-power-menu-mac" ~/.dsh/profiles/desktop/node_modules/dsh-power-m
 
 ## 配置
 
-延迟重启的等待时长在 `~/.dsh/dsh-power-menu-mac/config.json`，第一次读取时会自动生成：
+定时面板里那个输入框的**默认分钟数**在 `~/.dsh/dsh-power-menu-mac/config.json`，第一次读取时会自动生成：
 
 ```json
 {
@@ -126,7 +128,7 @@ ln -s "$PWD/dsh-power-menu-mac" ~/.dsh/profiles/desktop/node_modules/dsh-power-m
 }
 ```
 
-允许 1–1440 的整数（1 分钟到 24 小时）。写成别的值（小数、0、负数、超过 1440、字符串）一律回落到 10，不会出现"配错了就永不回来"。改完**打开一次菜单**就生效，不用重启应用。
+允许 1–1440 的整数（1 分钟到 24 小时）。写成别的值（小数、0、负数、超过 1440、字符串）一律回落到 10。改完**打开一次菜单**就生效，不用重启应用。面板里每次都可以临时改数字，配置文件只决定默认值。
 
 ## 工作原理
 
@@ -280,7 +282,7 @@ A macOS port of [dsh-power-menu](https://github.com/xichen-62/dsh-power-menu) (M
 
 - **刷新页面** — reload the renderer only; the app and its Host keep running, so this replaces the usual "restart just to refresh" habit.
 - **重启DSH** — quit and relaunch the app, so the window comes back automatically.
-- **N 分钟后重启** — quit now and come back after N minutes; N lives in `~/.dsh/dsh-power-menu-mac/config.json` (default 10).
+- **定时…** — a panel: pick minutes, then 关闭 after N / 重启 after N / quit now and come back after N. A waiting schedule can be cancelled from the same panel.
 - **关闭DSH** — quit the whole desktop app (no relaunch).
 
 The Windows build drove `taskkill` and PowerShell; this one drives POSIX `ps` / `kill` / `lsappinfo`. The meaningful difference: a restart is only reported as successful once the new process has **registered with the macOS window server** (`lsappinfo find pid=…`) and survived its startup grace — "the process is still alive" is not accepted as proof, which is all the original could check on macOS.
