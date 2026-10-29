@@ -112,6 +112,8 @@ ln -s "$PWD/dsh-power-menu-mac" ~/.dsh/profiles/desktop/node_modules/dsh-power-m
 
 > **注意**：点击即执行，没有二次确认。重启和关闭都会中断正在生成的回答、运行中的工具和后台任务，请在点之前保存手头的事情；**刷新不会中断任务**，它只重载界面，后台照常跑。
 
+> **改完插件代码要重启，别用刷新。** 刷新只重载页面，不会重新加载插件的客户端 bundle。而 DSH 的 bundle 是按 revision 发布的——磁盘上的文件一变，宿主算出的 revision 就跟页面手里那个对不上，请求会被**直接拒绝**（`dsh-client-modules` 的原话：*Versioned code is immutable; mismatched revisions are rejected instead of serving newer bytes*），表现为整组插件一起 `bundle script … failed to load`。刷新按钮是给「没改代码、只想重载界面」用的。
+
 ## 工作原理
 
 桌面版的进程树大致是：
