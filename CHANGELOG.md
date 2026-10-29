@@ -2,6 +2,12 @@
 
 本项目遵循 [Semantic Versioning](https://semver.org/spec/v2.0.0.html)，格式参考 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)。
 
+## [0.1.2] - 2026-10-29
+
+### Fixed
+
+- 重启 / 关闭时顺手把攒下来的 `dsh-auth-*` cookie 删到只剩最近 3 条。宿主每次启动都会下发一个**新名字**的 `dsh-auth-<随机>` cookie 且从不清理，而 cookie 不区分端口，所有端口上的宿主共用同一批；攒到 71 条时 `Cookie` 请求头就有 16.1 KB，越过 Node 默认的 16 KB 请求头上限，桌面版启动直接报 `desktop welcome: Web authentication failed`（2026-10-29 实测；用电源菜单反复重启会加速这个过程）。清理在 app 退出之后、重启之前进行，用 macOS 自带的 `/usr/bin/sqlite3` 改 Chromium 的 `Cookies` 库；只保留最近 3 条而不是全删，是为了不把同机另一个长期运行的 `dsh web`（浏览器里那个界面）当场登出。
+
 ## [0.1.1] - 2026-10-29
 
 ### Fixed
