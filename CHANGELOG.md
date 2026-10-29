@@ -2,6 +2,17 @@
 
 本项目遵循 [Semantic Versioning](https://semver.org/spec/v2.0.0.html)，格式参考 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)。
 
+## [0.1.1] - 2026-10-29
+
+### Fixed
+
+- 打开菜单不再把焦点放进第一项。第一项是「关闭DSH」，焦点落上去之后误按一个回车/空格就会把应用关掉。焦点现在留在触发按钮上；ArrowDown / ArrowUp / Home / End 仍然能进菜单（由触发按钮转发给菜单的键盘处理），Esc 照旧关闭。
+- 打开菜单时显式把焦点收回触发按钮。有些 WebKit 表面里点按钮不会自动聚焦，否则会出现「菜单开了但方向键没反应」。
+
+### Added
+
+- 菜单按钮上的契约属性：`data-dsh-power-action="shutdown"` / `data-dsh-power-action="restart"`。`MenuItem` 现在把多余 props 透传给底层 `button`，选择器和自动化检查可以直接按动作定位，不用匹配标签文字。
+
 ## [0.1.0] - 2026-10-26
 
 首个 macOS 版本。基于 [xichen-62/dsh-power-menu](https://github.com/xichen-62/dsh-power-menu) 0.1.18（MIT）移植。
