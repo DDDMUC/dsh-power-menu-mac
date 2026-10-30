@@ -17,7 +17,7 @@
 
 ### Changed
 
-- 菜单项改成按破坏性从小到大排列：**刷新页面 → 重启DSH → 定时… → 关闭DSH**。误触最多落到刷新，不会落到关闭。
+- 菜单项改成按破坏性从小到大排列：**刷新 → 重启 → 定时 → 关闭**。误触最多落到刷新，不会落到关闭。四项文案都去掉了多余的字和省略号（原「刷新页面」「重启DSH」「关闭DSH」「定时…」）。
 - 契约属性：`refresh` / `restart` / `schedule` / `shutdown`，面板内是 `schedule-shutdown` / `schedule-restart` / `schedule-restart-delayed` / `cancel-schedule`。
 - `config.json` 的 `delayedRestartMinutes` 现在是定时面板输入框的默认值（面板里可以每次临时改）。
 
