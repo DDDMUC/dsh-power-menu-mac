@@ -138,7 +138,7 @@ ln -s "$PWD/dsh-power-menu-mac" ~/.dsh/profiles/desktop/node_modules/dsh-power-m
 | --- | --- | --- |
 | `delayedRestartMinutes` | 定时面板输入框的**默认**分钟数 | 1–1440 的整数；小数、0、负数、超过 1440、字符串一律回落 10 |
 | `restartGuidance` | 是否注入下面那段系统提示词 | 只有显式 `false` 才关；缺省或写错类型都当开 |
-| `restartGuidanceText` | 自定义注入内容 | 非空字符串替换默认文本；超过 2000 字截断 |
+| `restartGuidanceText` | 提示词正文 | 界面里预填默认那句；与默认一字不差时存为空串（＝继续跟随默认，以后默认改了能跟上）；超过 2000 字截断 |
 
 改完**打开一次菜单**就生效（提示词是下一个请求生效），都不用重启应用。面板里每次都能临时改数字，`delayedRestartMinutes` 只决定默认值。
 
