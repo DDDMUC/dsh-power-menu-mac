@@ -6,6 +6,8 @@
 
 ### Added
 
+- 插件管理页里这一行现在有**配置控件**，打开是插件自己的配置页（`#/panel/plugins/dsh-power-menu-mac/dsh-power-menu-mac`）：分钟数、提示词开关、自定义文本三样都能在界面上改，点「保存」才写盘。走 `plugins.row.config` slot（key 为 `<包名>#<行 id>`），客户端因此多注入一个 `@deepseek-ai/dsh-client-ui-plugin-manager`。
+- 宿主新增 `POST /api/dsh-power-menu-mac/config`：校验 1–1440、文本截断到 2000 字、原子写回 `config.json`，并回读归一化后的结果。
 - 插件现在会向系统提示词注入一段说明：DSH 的重启与关闭由用户自己通过电源菜单完成，不要询问、也不要主动提议。声明了 `systemPrompt` 依赖，只在桌面宿主渲染（`dsh web` 上返回空串，整段丢弃）。**这是本插件第一次改变模型行为，不只是 UI**；范围刻意写窄到「重启/关闭 DSH」这一件事，避免压住其他正常询问。
 - 这段提示词可以关也可以换：`config.json` 里 `restartGuidance: false` 不注入，`restartGuidanceText` 填自己的话就替换默认文本（上限 2000 字，超出截断并记日志）。配置每次渲染都重新读，改完下一个请求生效，不用重启。
 - 菜单里新增 **刷新页面**：只重载渲染层，应用、Host、会话和正在跑的轮次都不受影响。之前想刷新只能重启整个应用，而重启一次就会多下发一条 `dsh-auth-<随机>` cookie —— 正是 0.1.2 修的那个 16 KB 请求头上限的成因。现在刷新不必再走重启。
