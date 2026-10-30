@@ -120,6 +120,8 @@ ln -s "$PWD/dsh-power-menu-mac" ~/.dsh/profiles/desktop/node_modules/dsh-power-m
 
 > **改完插件代码要重启，别用刷新。** 刷新只重载页面，不会重新加载插件的客户端 bundle。而 DSH 的 bundle 是按 revision 发布的——磁盘上的文件一变，宿主算出的 revision 就跟页面手里那个对不上，请求会被**直接拒绝**（`dsh-client-modules` 的原话：*Versioned code is immutable; mismatched revisions are rejected instead of serving newer bytes*），表现为整组插件一起 `bundle script … failed to load`。刷新按钮是给「没改代码、只想重载界面」用的。
 
+> **报 `bundle script … failed to load` 但你没改过本插件？** 先看崩溃日志里的 `renderer console` 段。整组插件是拼成**一个 `<script>`** 加载的，任何一个插件的 `client.js` 有语法错误都会让全组一起挂，报错会落在**别人的**文件上（例如 `dsh-url-router/client.js:3217 Uncaught SyntaxError`），本插件只是被连坐。核对办法：对 `~/.dsh/profiles/desktop/node_modules` 下每个 `lib/client.js` 跑一遍 `node --check`，坏的那个会直接报行号。常见成因是文件正被写入时恰好启动/刷新。
+
 ## 配置
 
 **在插件管理页里改**：插件列表 → `dsh-power-menu-mac` → 组件行右侧的**配置**控件 → `#/panel/plugins/dsh-power-menu-mac/dsh-power-menu-mac`。里面有分钟数、提示词开关和自定义文本框，点「保存」才写入。
