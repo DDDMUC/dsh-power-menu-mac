@@ -6,6 +6,12 @@
 
 ### Added
 
+- **支持 `dsh web` 部署**。之前只认桌面版（`desktopTarget()` 要求父进程是 Electron 主进程），在 `dsh web` 上按钮要么不出现、要么点了 409。现在同一个包在 web 上也工作：
+  - 目标是 **host 自己**（`process.pid`），不是某个上层应用。
+  - 「关闭」：有 launchd 作业就 `launchctl bootout`（真关掉，不会被 `KeepAlive` 立刻拉回来），没有就直接结束进程。
+  - 「重启」：有 launchd 就 `kickstart -k` 交给它；没有就自己杀掉、等端口释放、用**原来的 argv 和工作目录**重新 spawn。
+  - 两种重启都会从新进程的输出里抓 `dsh web: http://…?token=…`，然后 `open` 到默认浏览器——**每次启动 token 都会换**，不自动打开的话用户只能自己去日志里翻。
+  - `GET /health` 现在返回 `{desktop, web, supervised}`；web + 有 supervisor 时，弹窗里那条「现在关闭，N 分钟后启动」会收起（杀掉会被 launchd 立刻拉回来，helper 再 spawn 会抢端口）。
 - **刷新前会先检查插件文件有没有变**。DSH 的 bundle 按 revision 发布且不可变，文件一改，页面手里的旧 revision 就会被拒绝——刷新换来的是一整页「请关闭应用并重新安装」。现在点刷新会先比对 `GET /bundles` 给出的各插件 `mtime:size` 快照：没变就正常刷新；变了就弹框列出改动的插件，给「重启 / 仍然刷新 / 取消」三个选择。宿主判断不了（不在 profile 目录里、请求失败）时不拦，直接刷新。
 - **按钮在所有页面都能用了**。之前它被塞进会话标题栏的角标容器 `[data-conversation-header-corner]`，那个容器只在会话页存在，所以插件页、自动化任务页这些地方一个按钮都没有。现在检测不到可见的会话头时，按钮改为固定在窗口右上角（`position: fixed`），换页、改尺寸、切回会话都会重新判定。
 - 插件管理页里这一行现在有**配置控件**，打开是插件自己的配置页（`#/panel/plugins/dsh-power-menu-mac/dsh-power-menu-mac`）：分钟数、提示词开关、自定义文本三样都能在界面上改，点「保存」才写盘。走 `plugins.row.config` slot（key 为 `<包名>#<行 id>`），客户端因此多注入一个 `@deepseek-ai/dsh-client-ui-plugin-manager`。提示词输入框预填默认那句（不再留空），与默认一字不差时由宿主收敛成空串，语义仍是「继续跟随默认」。

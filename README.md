@@ -144,6 +144,22 @@ DSH 的客户端 bundle 是「版本化且不可变」的：revision 由文件�
 - 宿主拿不到 profile 目录（`process.cwd()` 下没有 `node_modules`）→ 返回 `supported: false`，前端**不拦**。判断不了的时候拦下来，比不拦更烦人。
 - 请求失败、超时、字段缺失 → 同样不拦，直接刷新。
 
+## 在 `dsh web` 上用
+
+同一个包也支持 `dsh web` 部署（不是桌面版）。差别只有"目标是谁"：
+
+| | 桌面版 | `dsh web` |
+| --- | --- | --- |
+| 目标进程 | Electron 主进程 | host 自己 |
+| 关闭 | 结束主进程，Host 优雅退出 | 有 launchd 作业 → `bootout`（真关）；没有 → 结束进程 |
+| 重启 | 杀掉 → 等端口 → 拉起 → 等窗口 | 有 launchd → `kickstart -k`；没有 → 杀掉 → 用原 argv 拉起 |
+| 就绪判据 | 主窗口出现 | 端口在听 + 输出里有 `dsh web:` 行 |
+| cookie 修剪 | 需要 | 用不上（cookie 在用户浏览器里） |
+
+**重启后链接会变**：`dsh web` 每次启动都生成新 token，所以插件会从新进程的输出里抓那条 `dsh web: http://…?token=…`，然后 `open` 到默认浏览器。无头部署可以设 `DSH_POWER_MENU_NO_OPEN=1` 关掉自动打开。
+
+web 上的 helper 状态和日志在**那个部署自己的 HOME** 下：`$HOME/.dsh/dsh-power-menu-mac/`。
+
 ## 配置
 
 **在插件管理页里改**：插件列表 → `dsh-power-menu-mac` → 组件行右侧的**配置**控件 → `#/panel/plugins/dsh-power-menu-mac/dsh-power-menu-mac`。里面有分钟数、提示词开关和自定义文本框，点「保存」才写入。
