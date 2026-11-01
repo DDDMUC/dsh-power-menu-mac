@@ -1,1 +1,1 @@
-58bb18d59d82609ba0e825d6d31b9533ebcf325f1a35f18e94564839dd6c78f2  dsh-power-menu-mac-0.1.3.tgz
+2ed5b61422bda31d26b151102fc6edb8634a95481e0b0e784ac865ec2ece5a89  dsh-power-menu-mac-0.1.4.tgz

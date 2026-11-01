@@ -2,6 +2,23 @@
 
 本项目遵循 [Semantic Versioning](https://semver.org/spec/v2.0.0.html)，格式参考 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)。
 
+## [0.1.4] - 2026-11-01
+
+### Added
+
+- **支持 `dsh web` 部署**。之前只认桌面版（`desktopTarget()` 要求父进程是 Electron 主进程），在 `dsh web` 上按钮要么不出现、要么点了 409。现在同一个包在 web 上也工作：
+  - 目标是 **host 自己**（`process.pid`），不是某个上层应用。
+  - 「关闭」：有 launchd 作业就 `launchctl bootout`（真关掉，不会被 `KeepAlive` 立刻拉回来），没有就直接结束进程。
+  - 「重启」：有 launchd 就 `kickstart -k` 交给它；没有就自己杀掉、等端口释放、用**原来的 argv 和工作目录**重新 spawn。
+  - 两种重启都会从新进程的输出里抓 `dsh web: http://…?token=…`，然后 `open` 到默认浏览器——**每次启动 token 都会换**，不自动打开的话用户只能自己去日志里翻。无头部署可设 `DSH_POWER_MENU_NO_OPEN=1` 关掉。
+  - `GET /health` 现在返回 `{desktop, web, supervised}`；web + 有 supervisor 时，弹窗里那条「现在关闭，N 分钟后启动」会收起（杀掉会被 launchd 立刻拉回来，helper 再 spawn 会抢端口）。
+
+### Fixed
+
+- **桌面版和 `dsh web` 跑的是同一个 `cli.js`**，原来的 `desktopTarget()` 只看 `ELECTRON_RUN_AS_NODE` 和父进程 pid，从终端起 `dsh web` 时会把那个 shell 当成 Electron 主进程——一点重启就把终端杀了。现在改为认 `DSH_DESKTOP_NODE_EXECUTABLE`（桌面版只给自己的 host 设）并比对父进程可执行文件。
+- **`XPC_SERVICE_NAME` 会一路继承**，不能拿它判断"被 launchd 管着"。现在会回查 `launchctl print` 里那个作业的 pid 是不是本进程。
+- **launchd plist 在真实用户目录**，而 web 部署常改 `HOME`；原来用 `os.homedir()` 会找错地方，supervised 重启抓不到新链接。改用 `os.userInfo().homedir` 优先。
+
 ## [0.1.3] - 2026-10-30
 
 ### Added
