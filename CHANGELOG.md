@@ -2,6 +2,15 @@
 
 本项目遵循 [Semantic Versioning](https://semver.org/spec/v2.0.0.html)，格式参考 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)。
 
+## [Unreleased]
+
+### Added
+
+- **刷新前先劝你去重启。** 插件的 `client.js` 在应用运行期间被改过时，刷新渲染层会让它加载失败（宿主在**启动时**生成 manifest，每个 bundle 的 revision 记在里面，刷新只重载渲染层、不重算 manifest），症状是一行 `1 entry did not activate` 加一个 `import failed`，只能 `Cmd+Q` 重开。现在三处一起挡：
+  - **常驻横幅**：每 30 秒、以及窗口重新获得焦点时各比一次 bundle 版本，发现漂移就在顶部挂一条「插件代码已变（N 个），刷新会让它们加载失败。请退出应用重开」，带「重启应用」按钮。这是主要手段——看到就不会去刷新了。
+  - **快捷键拦截**：漂移时 `Cmd/Ctrl+R`、`F5` 改弹原来的确认框（重启 / 仍然刷新 / 取消），不再静默刷新。
+  - **`beforeunload`**：菜单栏、地址栏、右键菜单触发的刷新接不到 keydown，用这道兜底。
+
 ## [0.1.4] - 2026-11-01
 
 ### Added
