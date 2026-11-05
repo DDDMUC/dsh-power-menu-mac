@@ -34,7 +34,7 @@ DSH Desktop 关窗口只是收进 Dock，真正退出或重启要走菜单栏；
 
 ## 安装
 
-> **重要**：装完插件后，必须再运行一次 `enable.sh`（或直接用下面的 `install.sh`），把 `dsh-power-menu-mac` 补进 profile 的 `dsh.profile.bundles`，然后重启 DSH。少了这一步，按钮会 404 —— 这是 DSH 插件管理器只写 `dependencies`、不写 bundles 的已知行为，不是插件本身的问题。
+> **关于 `enable.sh`**：从插件面板或商店一键安装时，宿主会自己把声明了 `dsh.bundle` 的依赖写进 `dsh.profile.bundles` 并启用——应用内走 `selectBundle(name, true)`，CLI 的 `dsh plugin install` 走 `reconcile()`（0.2.1-rc.5 与 0.2.2-rc.1 实测都如此），**不需要**再跑 `enable.sh`。只有更早的宿主、或者手动 `pnpm add` 之后才需要它补这一步；脚本是幂等的，多跑一次也无害。
 
 ### 方式 A：一键脚本（推荐）
 
@@ -317,7 +317,7 @@ dsh-power-menu-mac/
 可以。插件不拼 shell 字符串：启动用 `spawn(exe, [], { cwd })`，路径作为单个 argv 交给 Node 的 Unicode API；交接 JSON 和日志按 UTF-8 读写。helper 自带 `--pathtest`，会在「中文 + 空格」的临时目录里实测 UTF-8 读写和从中文路径启动脚本。
 
 **装完点按钮报 `HTTP 404`？**
-说明宿主半没加载：插件只在 `dependencies` 里，不在 `dsh.profile.bundles` 里。跑 `./enable.sh`，或手动把 `dsh-power-menu-mac` 加进 profile 的 `dsh.profile.bundles`，再重启 DSH。
+说明宿主半没加载：插件只在 `dependencies` 里，不在 `dsh.profile.bundles` 里。正常安装时宿主会自己补上（见上面「关于 `enable.sh`」），所以先确认 profile 的 `dsh.profile.bundles` 里到底有没有 `dsh-power-menu-mac`；没有就跑 `./enable.sh`，或手动加进去，再重启 DSH。
 
 **为什么按钮不挂真实 slot？**
 DSH 的 `conversation.session.header.corner` 是单占用槽，已经被侧栏开关占用；`conversation.session.header.utilities` 会排在侧栏左侧；`sidebar.footer.action` 在左下角。要在不修改 DSH 的前提下保持右上角，只能把按钮挂进 `headerCorner` 的 DOM。代价是上游改头部结构时可能失效；插件用 `MutationObserver` 跟随，不轮询。
@@ -366,6 +366,6 @@ cd dsh-power-menu-mac
 ./install.sh
 ```
 
-Or add `github:DDDMUC/dsh-power-menu-mac` in the DSH plugin manager, then run `./enable.sh` and restart DSH.
+Or add `github:DDDMUC/dsh-power-menu-mac` in the DSH plugin manager and restart DSH. The host adds any dependency that declares `dsh.bundle` to `dsh.profile.bundles` on install (0.2.1-rc.5 and 0.2.2-rc.1), so `./enable.sh` is only needed on older hosts or after a manual `pnpm add`.
 
 MIT licensed, retaining the original copyright.

@@ -2,6 +2,12 @@
 
 本项目遵循 [Semantic Versioning](https://semver.org/spec/v2.0.0.html)，格式参考 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)。
 
+## [0.1.8] - 2026-11-06
+
+### Changed
+
+- **README 不再说「装完必须跑 `enable.sh`，否则按钮 404」。** 那句话在当前宿主上已经不成立：安装时宿主会自己把声明了 `dsh.bundle` 的依赖写进 `dsh.profile.bundles`——应用内走 `selectBundle(name, true)`，CLI 的 `dsh plugin install` 走 `reconcile()`。我在 0.2.1-rc.5 和 0.2.2-rc.1 两份 `dsh-plugin-manager/lib/index.js` 里都核对过（前者 `selectBundle` 调用在 2092 行、`reconcile` 在 763 行；后者在 2860 行与 865 行）。原来那句会把想从商店一键安装的人劝退，现在改成「`enable.sh` 只在更早的宿主或手动 `pnpm add` 之后才需要，脚本幂等，多跑一次无害」。404 排障那一节同步改了。
+
 ## [0.1.7] - 2026-11-05
 
 ### Added
