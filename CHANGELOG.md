@@ -2,6 +2,17 @@
 
 本项目遵循 [Semantic Versioning](https://semver.org/spec/v2.0.0.html)，格式参考 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)。
 
+## [0.1.7] - 2026-11-05
+
+### Added
+
+- **`dsh.bundle.platforms: ["darwin"]`**。宿主在**安装前**读的是这个字段（官方目录里用它做离线发现和平台检查），`os` 只在 pnpm 那一层拦。只写 `os` 时，Linux 用户从商店点安装会先拿到 pnpm 的 `EBADPLATFORM`，而不是宿主的 `unsupported-platform`。两个都写，报错才落在宿主那边、文案才是「这个插件不支持你的平台」。
+
+### Changed
+
+- **描述改成「只在本机回环地址上应答」**。这个包自己不 listen 端口，是在 `ctx.webServer` 上注册 `/api/dsh-power-menu-mac` 前缀路由，再由 `trusted()` 逐请求校验 `remoteAddress`、`Host`、`Origin`、`sec-fetch-site`。原来的「只监听回环地址」把机制说错了，`package.json` 的 `description` 和 README 都改了。
+- README 补两条以前只写在代码注释里的行为：重启/关闭前会把 `dsh-auth-*` cookie 修剪到最近三条（不修剪会撞 16 KB 请求头上限），以及 `apply` 会注入一段全局 `systemPrompt`。
+
 ## [0.1.6] - 2026-11-04
 
 ### Changed
