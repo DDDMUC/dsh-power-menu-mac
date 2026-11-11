@@ -1,5 +1,16 @@
 # dsh-power-menu-mac
 
+<p align="center">
+  <a href="https://www.npmjs.com/package/dsh-power-menu-mac"><img alt="npm version" src="https://img.shields.io/npm/v/dsh-power-menu-mac?color=4d6bfe"></a>
+  <a href="https://www.npmjs.com/package/dsh-power-menu-mac"><img alt="npm downloads" src="https://img.shields.io/npm/dw/dsh-power-menu-mac"></a>
+  <a href="https://github.com/DDDMUC/dsh-power-menu-mac/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/DDDMUC/dsh-power-menu-mac?color=eac54f"></a>
+  <a href="LICENSE"><img alt="license" src="https://img.shields.io/npm/l/dsh-power-menu-mac"></a>
+</p>
+
+> ⭐ **如果这个项目对你有帮助，欢迎点个 Star 支持一下。**
+>
+> ⭐ **If you find this project useful, a star is appreciated.**
+
 给 DeepSeek Harness 桌面版（**macOS**）加一个右上角电源按钮：点开有 **刷新**、**重启**、**定时**、**关闭** 四项。**每次关闭或重启前，它自动把旧的登录 cookie 清到只剩最近三条**——DSH 每次启动都会下发一个新名字的 `dsh-auth-*` 却从不清旧的，攒到 71 条时 `Cookie` 请求头就超过 Node 默认的 16 KB 上限，宿主回 431、桌面壳报 `Web authentication failed`。电源菜单让重启变得随手可点，这个问题反而来得更快，所以清理是电源菜单不可或缺的职责。
 
 > macOS 专用 · 只支持 DSH Desktop · **重启前自动清理登录 cookie** · 纯本地 · 无外部依赖 · MIT
