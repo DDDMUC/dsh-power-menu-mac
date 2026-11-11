@@ -1,8 +1,8 @@
 # dsh-power-menu-mac
 
-给 DeepSeek Harness 桌面版（**macOS**）加一个右上角电源按钮：点开有 **刷新**、**重启**、**定时**、**关闭** 四项，省得每次改完插件/配置还要去菜单栏里翻「退出」——多数时候你要的只是刷新，不必重启。
+给 DeepSeek Harness 桌面版（**macOS**）加一个右上角电源按钮：点开有 **刷新**、**重启**、**定时**、**关闭** 四项。**每次关闭或重启前，它自动把旧的登录 cookie 清到只剩最近三条**——DSH 每次启动都会下发一个新名字的 `dsh-auth-*` 却从不清旧的，攒到 71 条时 `Cookie` 请求头就超过 Node 默认的 16 KB 上限，宿主回 431、桌面壳报 `Web authentication failed`。电源菜单让重启变得随手可点，这个问题反而来得更快，所以清理是它的第一件事，不是附赠的。
 
-> macOS 专用 · 只支持 DSH Desktop · 纯本地 · 无外部依赖 · MIT
+> macOS 专用 · 只支持 DSH Desktop · **重启前自动清理登录 cookie** · 纯本地 · 无外部依赖 · MIT
 >
 > 这是 [xichen-62/dsh-power-menu](https://github.com/xichen-62/dsh-power-menu)（Windows 版）的 **macOS 移植**，按 MIT 许可独立发布。原版的版权与思路保留在 [LICENSE](LICENSE) 和 [致谢](#致谢) 里。
 
@@ -12,11 +12,14 @@
 
 DSH Desktop 关窗口只是收进 Dock，真正退出或重启要走菜单栏；而改插件、改配置之后又经常需要重启一次。这个插件把这两步搬到会话标题栏右上角：一个电源键，两项操作，点完就走。
 
-原版只支持 Windows —— 它靠 `taskkill` 结束进程、靠 PowerShell 读进程表和窗口句柄。macOS 上这些都没有，所以这里把它们换成了 POSIX 的做法，并且**顺手补上了原版在 Mac 上做不到的那件事**（见下面「重启是怎么验证成功的」）。
+原版只支持 Windows —— 它靠 `taskkill` 结束进程、靠 PowerShell 读进程表和窗口句柄。macOS 上这些都没有，所以这里把它们换成了 POSIX 的做法，并且补上了原版在 Mac 上做不到的两件事：**重启会验证新进程真的注册到了窗口服务器**，以及**每次重启前自动修剪登录 cookie**。
+
+后一件事是电源菜单自己带来的：以前重启要走菜单栏，一天做不了几次；现在右上角点一下就够了，重启次数上去了，cookie 累积也就快了。这个失败不是「偶发的登录问题」——它是可复现的、会随重启次数必然出现的问题（实测 71 条触发），而且一旦触发，桌面壳只会报一句 `Web authentication failed`，看不出跟 cookie 有任何关系。所以插件在应用退出后、新实例拉起前直接把 `dsh-auth-*` 修剪到最近三条，不让它攒起来。
 
 ## 功能
 
 - **右上角电源按钮**：会话页里位于标题栏图标行最右侧（顺序为「布局 / 侧栏 / 电源」）；插件、自动化任务这类**没有会话标题栏的页面**，按钮改为固定在窗口右上角，换页不消失。
+- **重启前自动清理登录 cookie，不会越用越登不上**：宿主每次启动都会下发一个**新名字**的 `dsh-auth-*` cookie，旧的一个都不清；cookie 不区分端口，所有端口上的宿主共用同一批。攒到 71 条时 `Cookie` 请求头达 16.1 KB，越过 Node 默认的 16 KB 上限，宿主回 431、桌面壳报 `Web authentication failed`（实测，重启越频繁越快）。插件在应用退出后、新实例拉起前把旧的删到只剩最近三条，同步完成，约 30ms。
 - **空会话也显示**：欢迎页和对话内使用同一个挂载位置，透明无底色，不会破坏主题，也不会出现两个按钮。
 - **四项操作**：白色圆角卡片、悬浮阴影、左侧线性图标 + 右侧文本，不塞多余入口；按破坏性从小到大排，误触最多落到「刷新」。
 - **刷新**：只重载这一层页面，应用和 Host 都不动。**点之前会先比对插件文件**：如果某个 `client.js` 在你打开页面之后被改过，刷新会让它（及同组的条目）加载失败，这时会弹框列出改动的插件，建议改走重启。
@@ -28,7 +31,6 @@ DSH Desktop 关窗口只是收进 Dock，真正退出或重启要走菜单栏；
 - **执行反馈**：点击后整页盖一层半透明遮罩，显示「正在关闭DSH…」/「正在重启DSH…」。
 - **有配置页**：插件管理页里这一行带一个配置控件，打开就是自己的页面（`#/panel/plugins/dsh-power-menu-mac/dsh-power-menu-mac`）。分钟数、提示词开关、自定义文本都在里面，改完点保存才写入。
 - **顺带管住模型的嘴**：插件会向系统提示词注入一句「DSH 的重启与关闭由用户自己通过电源菜单完成，不要询问也不要主动提议」。装了电源菜单的人自己两下就点完了，模型再问一轮只是废话。**只在桌面宿主生效**——`dsh web` 上没有这个按钮，那段话会整段丢弃，不会给出错误指引。
-- **顺带修剪登录 cookie**：关闭/重启前会把 Chromium Cookies 里旧的 `dsh-auth-*` 删到只剩最近三条。宿主每次启动都会下发一个**新名字**的 cookie 且从不清旧的，攒到 71 条时 `Cookie` 请求头就超过 Node 默认的 16 KB 上限，宿主回 431、桌面壳报 `Web authentication failed`（重启越频繁越快）。
 - **纯本地**：没有外部依赖、没有遥测；插件自己不 listen 端口，而是在宿主自带的 web 服务器上注册 `/api/dsh-power-menu-mac` 前缀路由，只在本机回环地址上应答（校验 `remoteAddress`、`Host`、`Origin`、`sec-fetch-site`）。
 - **非 macOS 不加载**：宿主半只说 POSIX，所以在别的系统上按钮**根本不会画出来**，而不是画出来点了没反应。
 
@@ -226,11 +228,13 @@ flowchart LR
 具体步骤：
 
 1. Host 把交接信息写到 `~/.dsh/dsh-power-menu-mac/`，用 `process.execPath` + `ELECTRON_RUN_AS_NODE=1` 启动 `lib/helper.cjs`。
-2. helper 等 1.2 秒，让 HTTP 应答先到浏览器。
+2. helper 等约 0.3 秒，让 HTTP 应答先到浏览器、遮罩画出来；孤儿进程快照与它并行跑，谁慢等谁。
 3. helper 对 Electron 主进程发 `SIGTERM`（让它有机会收尾），必要时 `SIGKILL`。**只对主进程**，不碰它的子树。
 4. Host 检测到断开后走自己的 `application.shutdown`，尽量把会话日志正常落盘。
 5. 重启模式下，helper 等旧监听端口释放，清掉 `ELECTRON_RUN_AS_NODE` / `DSH_DESKTOP_NODE_EXECUTABLE`，用原可执行文件重新拉起，**并验证新进程真的注册到了窗口服务器**；失败会重试，仍失败就弹窗提示手动打开。
 6. 关闭模式下不拉起，等 Host 自己退出。
+
+**为什么不更快**：一次重启里能压缩的只有 helper 自己的等待，现已改成条件等待与更细的轮询——等浏览器应答约 0.3 秒（孤儿快照并行）、端口确认释放后再留 0.15 秒、新进程注册窗口后观察 1 秒。cookie 修剪同步完成，约 30ms，不在关键路径上。剩下约 2.7 秒是主进程优雅退出（宿主 `application.shutdown` 刷会话日志）、约 0.55 秒是新进程启动到注册窗口，这两段不属于插件；`SIGKILL` 能省掉前者，但会丢日志，这里刻意不做。窗口观察期也不能砍到 0，否则白屏和秒退会被报成重启成功。
 
 ### 重启是怎么验证成功的
 
@@ -246,7 +250,7 @@ lsappinfo find pid=<新进程>
 
 - 有输出 → 这个进程**已经作为 GUI 应用注册到窗口服务器**，有界面了。
 - 空输出 → 进程在跑，但从来没连上窗口服务器（崩溃循环、headless 重启）。
-- 之后再要求它活过启动宽限期（单实例锁意味着第二个实例会立刻退出，活下来就说明是它）。
+- 之后再要求它活过 1 秒的启动宽限期（单实例锁意味着第二个实例会立刻退出，活下来就说明是它）。轮询间隔 250ms，总上限 20 秒。
 
 `lsappinfo` 是 macOS 自带、**不需要任何权限**。另一条路（`osascript` + System Events 查窗口）需要辅助功能授权，会在用户面前弹一个同意框 —— 而这个框恰好出现在"应用刚重启失败"的时候，非常糟糕，所以没用。
 
@@ -349,14 +353,14 @@ DSH 的 `conversation.session.header.corner` 是单占用槽，已经被侧栏�
 
 ## English
 
-A macOS port of [dsh-power-menu](https://github.com/xichen-62/dsh-power-menu) (MIT). Adds a power button to the top-right of the DSH Desktop session header with three actions, least destructive first:
+A macOS port of [dsh-power-menu](https://github.com/xichen-62/dsh-power-menu) (MIT). Adds a power button to the top-right of the DSH Desktop session header — and **before every shutdown or restart, prunes stale `dsh-auth-*` cookies down to the latest three**. DSH issues a new cookie name on every launch and never clears the old ones; at 71 cookies the request header crosses Node's 16 KB limit, the host answers 431 and the desktop shell reports `Web authentication failed`. A power button makes restarts cheap, so that failure arrives sooner — this plugin removes the cause. Four actions, least destructive first:
 
 - **刷新** — reload the renderer only; the app and its Host keep running, so this replaces the usual "restart just to refresh" habit.
 - **重启** — quit and relaunch the app, so the window comes back automatically.
 - **定时** — a modal: pick minutes, then 关闭 after N / 重启 after N / quit now and come back after N. A waiting schedule can be cancelled from the same panel.
 - **关闭** — quit the whole desktop app (no relaunch).
 
-The Windows build drove `taskkill` and PowerShell; this one drives POSIX `ps` / `kill` / `lsappinfo`. The meaningful difference: a restart is only reported as successful once the new process has **registered with the macOS window server** (`lsappinfo find pid=…`) and survived its startup grace — "the process is still alive" is not accepted as proof, which is all the original could check on macOS.
+The Windows build drove `taskkill` and PowerShell; this one drives POSIX `ps` / `kill` / `lsappinfo`. The meaningful difference: a restart is only reported as successful once the new process has **registered with the macOS window server** (`lsappinfo find pid=…`) and survived a 1-second startup grace — "the process is still alive" is not accepted as proof, which is all the original could check on macOS. The helper's own waits are conditional and short; the remaining time is the host flushing session logs on the way out, which is deliberately not skipped with `SIGKILL`.
 
 macOS only (`os: ["darwin"]`), DSH Desktop only. No telemetry, no external dependencies; the four HTTP routes are loopback-only and same-origin fenced.
 
