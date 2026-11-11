@@ -2,6 +2,14 @@
 
 本项目遵循 [Semantic Versioning](https://semver.org/spec/v2.0.0.html)，格式参考 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)。
 
+## [0.2.0] - 2026-11-12
+
+### Changed
+
+- **重启从 7.3 秒降到 4.4 秒**（优化前 151 次样本中位数 → 优化后真实重启实测）。`lib/index.js` 写进 handoff 的 `delayMs` 从 1200ms 降到 300ms，helper 的前置等待与孤儿进程快照并行；端口确认释放后的固定等待从 800ms 降到 150ms；窗口验证从「500ms 轮询 × 4 = 2000ms 宽限」改成 250ms 轮询 + 1000ms 宽限。1 秒宽限保留——单实例锁会让重复实例立刻退出，活过它才是不把白屏/秒退报成成功的关键。
+- **README / About 把「清理旧的 `dsh-auth-*` cookie」提到最前面作为第一卖点**：71 条 → 16 KB 请求头 → 431 → `Web authentication failed`，而电源菜单让重启变便宜、反而加速了这个失败。窗口服务器验证降为第二卖点。
+- README 头部加 npm 版本 / 周下载 / GitHub stars / license 四个 badge 和中英双语 Star 提示。
+
 ## [0.1.8] - 2026-11-06
 
 ### Changed
