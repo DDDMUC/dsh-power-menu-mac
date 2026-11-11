@@ -353,7 +353,7 @@ DSH 的 `conversation.session.header.corner` 是单占用槽，已经被侧栏�
 
 ## English
 
-A macOS port of [dsh-power-menu](https://github.com/xichen-62/dsh-power-menu) (MIT). Adds a power button to the top-right of the DSH Desktop session header — and **before every shutdown or restart, prunes stale `dsh-auth-*` cookies down to the latest three**. DSH issues a new cookie name on every launch and never clears the old ones; at 71 cookies the request header crosses Node's 16 KB limit, the host answers 431 and the desktop shell reports `Web authentication failed`. A power button makes restarts cheap, so that failure arrives sooner — this plugin removes the cause. Four actions, least destructive first:
+A macOS port of [dsh-power-menu](https://github.com/xichen-62/dsh-power-menu) (MIT). Adds a power button to the top-right of the DSH Desktop session header — and **before every shutdown or restart, prunes stale `dsh-auth-*` cookies down to the latest three**. DSH issues a new cookie name on every launch and never clears the old ones; at 71 cookies the request header crosses Node's 16 KB limit, the host answers 431 and the desktop shell reports `Web authentication failed`. A power button makes restarts cheap, so that failure arrives sooner; pruning those cookies is therefore an indispensable duty of the power menu. Four actions, least destructive first:
 
 - **刷新** — reload the renderer only; the app and its Host keep running, so this replaces the usual "restart just to refresh" habit.
 - **重启** — quit and relaunch the app, so the window comes back automatically.
