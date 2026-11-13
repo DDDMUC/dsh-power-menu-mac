@@ -2,6 +2,12 @@
 
 本项目遵循 [Semantic Versioning](https://semver.org/spec/v2.0.0.html)，格式参考 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)。
 
+## [0.2.1] - 2026-11-13
+
+### Added
+
+- **悬停即展开，无需点击**：鼠标移到电源按钮上面板就出现，移开自动收起；按钮与菜单之间留 220ms 过渡，不会一离开就闪没。点击仍会把焦点交给按钮，`↑` / `↓` / `Enter` 键盘操作照旧；弹窗或执行遮罩期间不误展开。组件卸载时会清掉尚未触发的关闭定时器。README 中英文同步说明。
+
 ## [0.2.0] - 2026-11-12
 
 ### Changed
