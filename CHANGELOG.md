@@ -2,6 +2,18 @@
 
 本项目遵循 [Semantic Versioning](https://semver.org/spec/v2.0.0.html)，格式参考 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)。
 
+## [0.2.2] - 2026-11-16
+
+### Fixed
+
+- **重启不再被 30 秒看门狗误判**：helper 退出前写 `<handoff>.result.json`（成功 `{ok:true}`，失败带 `error`），宿主读这份标记才决定是否放开 at-most-once 闩。helper 还在跑就一直等，冷启动被系统拖到 2 分半也不会判失败；只有 helper 明确失败退出才放开。14:00 日志里的「helper exited before the transition」其实是 helper 已经 `restart: complete` 后旧宿主误读正常退出，不是早退。
+- **遮罩不再永久锁死界面**：POST 返回 202 后每 2 秒查 `/health`；`pending` 变回 null 就撤遮罩并按 `lastResult.error` 报错，helper 后来完成（`lastResult.ok`）也会撤掉；另有 5 分钟硬上限。判失败后界面立刻恢复可交互，不再等窗口消失。
+- **孤儿快照最多等 2 秒**：`ps -A` 在系统卡顿时会超过 5 秒超时，以前会把 kill/relaunch 拖住（实测多 17 秒）；现在超时就带空快照继续切换，并记 `continuing without orphan cleanup`，孤儿检查失败不再影响重启本身。
+
+### Changed
+
+- **装了 dsh-topbar 时，电源按钮优先挂进它的条内挂载位**（`[data-dsh-topbar-slot]`，用 `getClientRects().length > 0` 判可见）；不可见时退回会话头 corner，两者都没有才浮层。槽本身 `display:flex`、高 42px，按钮垂直居中，不需要额外 margin。
+
 ## [0.2.1] - 2026-11-13
 
 ### Added
