@@ -2,6 +2,16 @@
 
 本项目遵循 [Semantic Versioning](https://semver.org/spec/v2.0.0.html)，格式参考 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)。
 
+## [0.2.3] - 2026-11-20
+
+### Added
+
+- **新增「等 AI 空闲后关闭 / 重启」**：定时弹窗里新增两行动作，和原来的三行同一套样式；不绑定分钟数，点了就立刻开始等。helper 通过 host 的 `/health` 查 `runningAgents`；还有 running 的 AI 就每秒轮询，连续 1.5 秒为 0 才继续关闭/重启。等待逻辑仍在 detached helper 里，host 忙不会丢；等待期间胶囊显示还有几个 AI 在跑，点 × 可取消。
+
+### Changed
+
+- **装了 dsh-topbar 时，电源按钮优先挂进它的条内挂载位**（`[data-dsh-topbar-slot]`，用 `getClientRects().length > 0` 判可见）；不可见时退回会话头 corner，两者都没有才浮层。
+
 ## [0.2.2] - 2026-11-16
 
 ### Fixed
