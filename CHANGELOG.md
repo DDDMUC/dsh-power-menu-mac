@@ -2,6 +2,17 @@
 
 本项目遵循 [Semantic Versioning](https://semver.org/spec/v2.0.0.html)，格式参考 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)。
 
+## [0.2.4] - 2026-11-22
+
+### Fixed
+
+- **「宿主卡死」不再被记成重启成功**：窗口出现只证明 Electron 主进程活着。helper 现在会在窗口之后再验一次：用 `lsof` 找出新实例（含它的 Host 子进程）监听的端口，对端口发一条 HTTP `GET /`，25 秒内有任何应答才算完成。端口绑上了却一直沉默——也就是 2026-11-22 07:07 那次的样子——写 `{ok:false}` 并弹一条系统提示，直接告诉用户退出后重开，而不是留下一个「已成功」的假象。
+- **遮罩不再等一个永远不会来的回答**：`/health` 的 fetch 加了 2 秒超时。连续三次「连得上但不回话」就撤掉遮罩，提示「宿主进程还在，但一直没有应答。请退出 DSH 后重新打开。」以前没有超时，`setInterval` 每 2 秒叠一条永远 pending 的请求，一次卡死能堆两百多条连接；现在同样的故障只会留下三次超时。
+
+### Added
+
+- helper 新增 `--hosttest <pid> [ms]`：手动验一个进程的宿主答不答话。卡死的实例返回 `{"ok":false,"sawListener":true}`，正常实例返回 `{"ok":true,"port":N}`。
+
 ## [0.2.3] - 2026-11-20
 
 ### Added
