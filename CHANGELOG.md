@@ -2,6 +2,12 @@
 
 本项目遵循 [Semantic Versioning](https://semver.org/spec/v2.0.0.html)，格式参考 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)。
 
+## [0.2.5] - 2026-11-23
+
+### Fixed
+
+- **重启后应用起不来、渲染进程崩溃**：helper 以前用 `spawn` 直接拉起应用二进制，新实例会继承调用方的整份环境。当重启是由一个被沙箱包住的调用方触发时（例如 agent 会话里跑起来的 helper），新实例的 Chromium 沙箱会以 `sandbox initialization failed: Operation not permitted` 失败，渲染进程随即崩溃，界面报 `Desktop renderer exited: crashed`，主进程随后报 `desktop backend is closed`。2026-11-23 00:50 和 00:55 连着崩了两次。现在 macOS 上改为通过 LaunchServices（`open -a <bundle> --args …`）启动，应用由 launchd 拉起，环境干净；`open` 不返回应用 pid，所以改用 `lsappinfo` 查新实例，再走原来的窗口 + HTTP 应答校验。非 `.app` 的部署（`dsh` 命令行）仍走 `spawn`。
+
 ## [0.2.4] - 2026-11-22
 
 ### Fixed
