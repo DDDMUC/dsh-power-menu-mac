@@ -2,6 +2,12 @@
 
 本项目遵循 [Semantic Versioning](https://semver.org/spec/v2.0.0.html)，格式参考 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)。
 
+## [0.2.6] - 2026-11-28
+
+### Fixed
+
+- 重启/关闭时判断端口是否释放不再用 TCP 连接探测：宿主卡死时连接会超时，旧逻辑把「连不上」误判成「端口已空闲」，于是只拉起新实例、不清掉旧宿主，留下一个占数 GB 的僵尸进程。改成尝试绑定端口——`EADDRINUSE` 说明仍被占用（不管那个进程是否还响应），能绑定成功才是真的释放。三个平台同修。
+
 ## [0.2.5] - 2026-11-23
 
 ### Fixed
